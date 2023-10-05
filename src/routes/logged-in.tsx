@@ -1,3 +1,14 @@
+import { isLoggedInVar } from "../apollo";
+
 export const LoggedIn = () => {
-  return <span>Logged In</span>;
+  const onClick = () => {
+    isLoggedInVar(false);
+  };
+
+  return (
+    <div>
+      <h1>Logged In</h1>
+      <button onClick={onClick}>Click to Logout</button>
+    </div>
+  );
 };
