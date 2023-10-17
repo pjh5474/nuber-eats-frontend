@@ -1,11 +1,11 @@
-import { gql, useMutation } from "@apollo/client";
+import { ApolloError, gql, useMutation } from "@apollo/client";
 import { useForm } from "react-hook-form";
 import { FormError } from "../components/form-error";
 import { LoginMutation, LoginMutationVariables } from "../__api__/types";
 
 const LOGIN_MUTATION = gql`
-  mutation Login($email: String!, $password: String!) {
-    login(input: { email: $email, password: $password }) {
+  mutation Login($loginInput: LoginInput!) {
+    login(input: $loginInput) {
       ok
       token
       error
@@ -25,18 +25,37 @@ export const Login = () => {
     formState: { errors },
     handleSubmit,
   } = useForm<ILoginForm>();
-  const [loginMutation, { loading, error, data }] = useMutation<
+
+  const onCompleted = (data: LoginMutation) => {
+    const {
+      login: { error, ok, token },
+    } = data;
+    if (ok) {
+      console.log(token);
+    }
+  };
+
+  const onError = (error: ApolloError) => {};
+
+  const [loginMutation, { data: loginMutationResult, loading }] = useMutation<
     LoginMutation,
     LoginMutationVariables
-  >(LOGIN_MUTATION);
+  >(LOGIN_MUTATION, {
+    onCompleted,
+    onError,
+  });
   const onSubmit = () => {
-    const { email, password } = getValues();
-    loginMutation({
-      variables: {
-        email,
-        password,
-      },
-    });
+    if (!loading) {
+      const { email, password } = getValues();
+      loginMutation({
+        variables: {
+          loginInput: {
+            email,
+            password,
+          },
+        },
+      });
+    }
   };
   return (
     <div className="h-screen flex items-center justify-center bg-gray-800">
@@ -74,7 +93,12 @@ export const Login = () => {
           {errors.password?.message && (
             <FormError errorMessage={errors.password?.message} />
           )}
-          <button className="mt-3 btn">Log In</button>
+          <button className="mt-3 btn">
+            {loading ? "Loading..." : "Log In"}
+          </button>
+          {loginMutationResult?.login.error && (
+            <FormError errorMessage={loginMutationResult.login.error} />
+          )}
         </form>
       </div>
     </div>

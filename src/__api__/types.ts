@@ -574,8 +574,7 @@ export type VerifyEmailOutput = {
 };
 
 export type LoginMutationVariables = Exact<{
-  email: Scalars['String']['input'];
-  password: Scalars['String']['input'];
+  loginInput: LoginInput;
 }>;
 
 
